@@ -1,22 +1,25 @@
 import "./Navbar.css";
-
 import sacola from "assets/icons/sacola.svg";
 import logo from "assets/icons/logo.svg";
-import paleta from "assets/icons/paleta.svg"
-import atualizar from "assets/icons/atualizar.svg"
+import paleta from "assets/icons/paleta.svg";
+import atualizar from "assets/icons/atualizar.svg";
 import { ActionMode } from "constants/index";
 
 function Navbar({ createPaleta, updatePaleta, mode }) {
-
-    return (
-      <div className="Header">
-          <div className="row">
-              <div className="Header__logo Logo">
-                  <img src={logo} width="70px" alt="Logo El Geladon" className="Logo__icone" />
-                  <span className="Logo__titulo"> El Geladon </span>
-              </div>
-              <div className="Header__opcoes Opcoes">
-              <button
+  return (
+    <div className="Header">
+      <div className="row">
+        <div className="Header__logo Logo">
+          <img
+            src={logo}
+            width="70px"
+            alt="Logo El Geladon"
+            className="Logo__icone"
+          />
+          <span className="Logo__titulo"> El Geladon </span>
+        </div>
+        <div className="Header__opcoes Opcoes">
+          <button
             type="button"
             className={`Opcoes__paleta Paleta ${
               mode === ActionMode.ATUALIZAR && "Paleta--ativa"
