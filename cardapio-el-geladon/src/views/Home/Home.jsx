@@ -4,8 +4,13 @@ import AdicionaEditaPaletaModal from "components/AdicionaEditaPaletaModal/Adicio
 import Navbar from "components/Navbar/Navbar";
 import { useState } from "react";
 import { ActionMode } from "constants/index";
+import DeletaPaletaModal from "components/DeletaPaletaModal/DeletaPaletaModal";
+import SacolaModal from "components/SacolaModal/SacolaModal";
+import { SacolaService } from "services/SacolaService";
 
 function Home() {
+  const [paletaEditada, setPaletaEditada] = useState();
+
   const [canShowAdicionaPaletaModal, setCanShowAdicionaPaletaModal] =
     useState(false);
   const [paletaParaAdicionar, setPaletaParaAdicionar] = useState();
@@ -21,45 +26,74 @@ function Home() {
 
   const handleDeletePaleta = (paletaToDelete) => {
     setPaletaParaDeletar(paletaToDelete);
-  }
-  
-  
+  };
+
   const handleUpdatePaleta = (paletaToUpdate) => {
     setPaletaParaEditar(paletaToUpdate);
     setCanShowAdicionaPaletaModal(true);
-  } 
+  };
 
-  
-const handleCloseModal = () => {
-  setCanShowAdicionaPaletaModal(false);
-  setPaletaParaAdicionar();
-  setPaletaParaDeletar();
-  setPaletaParaEditar();
-}
+  const handleCloseModal = () => {
+    setCanShowAdicionaPaletaModal(false);
+    setPaletaParaAdicionar();
+    setPaletaParaDeletar();
+    setPaletaParaEditar();
 
+    setModoAtual(ActionMode.NORMAL);
+  };
+  const [paletaRemovida, setPaletaRemovida] = useState();
+  {
+    paletaParaDeletar && (
+      <DeletaPaletaModal
+        paletaParaDeletar={paletaParaDeletar}
+        closeModal={handleCloseModal}
+        onDeletePaleta={(paleta) => setPaletaRemovida(paleta)}
+      />
+    );
+  }
+
+  const [canOpenBag, setCanOpenBag] = useState();
+
+  const abrirSacola = async () => {
+    const lista = JSON.parse(localStorage.getItem("sacola"));
+    const sacola = lista.filter((i) => i.quantidade > 0);
+
+    await SacolaService.create(sacola);
+
+    setCanOpenBag(true);
+  };
 
   return (
     <div className="Home">
       <Navbar
         mode={modoAtual}
         createPaleta={() => setCanShowAdicionaPaletaModal(true)}
+        deletePaleta={() => handleActions(ActionMode.DELETAR)}
+        openBag={abrirSacola}
         updatePaleta={() => handleActions(ActionMode.ATUALIZAR)}
       />
+
       <div className="Home__container">
         <PaletaLista
           mode={modoAtual}
           paletaCriada={paletaParaAdicionar}
+          paletaEditada={paletaEditada}
+          paletaRemovida={paletaRemovida}
           deletePaleta={handleDeletePaleta}
-          updatePaleta={handleUpdatePaleta} />
-        
+          updatePaleta={handleUpdatePaleta}
+        />
+
         {canShowAdicionaPaletaModal && (
-         <AdicionaEditaPaletaModal
-         mode={modoAtual}
-         paletaToUpdate={paletaParaEditar}
-         closeModal={handleCloseModal}
-         onCreatePaleta={(paleta) => setPaletaParaAdicionar(paleta)}
-         />
+          <AdicionaEditaPaletaModal
+            mode={modoAtual}
+            paletaToUpdate={paletaParaEditar}
+            onUpdatePaleta={(paleta) => setPaletaEditada(paleta)}
+            closeModal={handleCloseModal}
+            onCreatePaleta={(paleta) => setPaletaParaAdicionar(paleta)}
+          />
         )}
+
+        {canOpenBag && <SacolaModal closeModal={() => setCanOpenBag(false)} />}
       </div>
     </div>
   );

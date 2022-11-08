@@ -8,10 +8,14 @@ import PaletaDetalhesModal from "components/PaletaDetalhesModal/PaletaDetalhesMo
 
 import { ActionMode } from "constants/index";
 
-function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta }) {
+function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta, paletaEditada, paletaRemovida}) {
+  
+  const selecionadas = JSON.parse(localStorage.getItem('selecionadas')) ?? {};
+
   const [paletas, setPaletas] = useState([]);
 
-  const [paletaSelecionada, setPaletaSelecionada] = useState({});
+  const [paletaSelecionada, setPaletaSelecionada] = useState(selecionadas);
+
 
   const [paletaModal, setPaletaModal] = useState(false);
 
@@ -21,6 +25,19 @@ function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta }) {
     };
     setPaletaSelecionada({ ...paletaSelecionada, ...paleta });
   };
+
+  const setSelecionadas = useCallback(() => {
+    if(!paletas.length) return
+
+    const entries = Object.entries(paletaSelecionada);
+    const sacola = entries.map(arr => ({
+      paletaId: paletas[arr[0]].id,
+      quantidade: arr[1]
+    }))
+
+    localStorage.setItem('sacola', JSON.stringify(sacola))
+    localStorage.setItem('selecionadas', JSON.stringify(paletaSelecionada))
+  }, [ paletaSelecionada, paletas ])
 
   const removerItem = (paletaIndex) => {
     const paleta = {
@@ -44,6 +61,8 @@ function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta }) {
     };
 
     mapper[mode]();
+
+    
   };
 
   const adicionaPaletaNaLista = useCallback(
@@ -53,6 +72,10 @@ function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta }) {
     },
     [paletas]
   );
+
+  useEffect(() => {
+    setSelecionadas();
+  }, [ setSelecionadas, paletaSelecionada ]);
 
   useEffect(() => {
     if (
@@ -65,7 +88,7 @@ function PaletaLista({ paletaCriada, mode, updatePaleta, deletePaleta }) {
 
   useEffect(() => {
     getLista();
-  }, []);
+  }, [paletaEditada , paletaRemovida]);
 
   return (
     <div className="PaletaLista">
